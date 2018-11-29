@@ -1,3 +1,4 @@
+import configparser
 import requests
 from time import sleep, time
 from binanceapi import BinanceRestful
@@ -435,13 +436,15 @@ if __name__ == '__main__':
 
     do_signer_test()
 
-    binance_api = BinanceRestful(key="VwGVOsRuGkWGuZDXeymkP7doRstYfMiYWLPT4KrkXVfjrltXPXtO6S8pXKNx4mEm",
-                                 secret="qfBeCO4ZJpGvKyH6HsVwtHVBgqg65NHk3hjW5JVvHBe4EpgtA6xWTP9zT6rTWz5A")
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+
+    binance_api = BinanceRestful(key=config['Binance']['key'], secret=config['Binance']['secret'])
 
     # result = binance_api.get_exchange_info()
     # print(result)
 
-    huobi_api = HuobiApi(key="3282c090-c280c7b3-75b395de-4c5eb", secret="62691213-db0edfc7-7927c5b0-ed09d")
+    huobi_api = HuobiApi(key=config['Huobi']['key'], secret=config['Huobi']['secret'])
 
     seller_id = ''
 
