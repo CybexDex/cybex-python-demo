@@ -244,10 +244,12 @@ class OrderManager:
                 pending_count = pending_count + 1
             if order.order_status in {OrderStatus.PendingNew, OrderStatus.New, OrderStatus.PartiallyFilled}:
                 if target > 0 and order.sell_asset_id == sym_base:
-                    self.cancel(order.trx_id)
+                    result = self.cancel(order.trx_id)
+                    # if result is not rejected
                     order.order_status = OrderStatus.PendingCancel
                 elif target < 0 and order.buy_asset_id == sym_base:
-                    self.cancel(order.trx_id)
+                    result = self.cancel(order.trx_id)
+                    # if result is not rejected
                     order.order_status = OrderStatus.PendingCancel
 
         if pending_count > 3:
@@ -268,12 +270,11 @@ class OrderManager:
 
         if to_trade * target < 0:
             # Opposite to_trade and target direction. Something wired happened, cancel all and retry later.
-        if to_trade > 0:
-            if target < 0:
-                # Wanted to buy but target is negative. There are extra sell orders out there.
-                # Cancel them all and pick up new data in the next cycle and process later.
+            self.cancel_all(symbol)
+            return
 
-                return
+        # Now the target and to_trade is the same direction.
+        if to_trade > 0:
             best_ask = orderbook.get_best_ask()
             self.buy(to_trade, best_ask)
         elif to_trade < 0:
@@ -365,7 +366,7 @@ class OrderManager:
         new_order.sell_asset_id = sym_base
         new_order.buy_asset_id = sym_quote
         self.orders[new_order.trx_id] = new_order
-        self.api_server.place_order(new_order_json)
+        return self.api_server.place_order(new_order_json)
 
     def buy(self, price, quantity):
         print("buy", quantity)
@@ -375,11 +376,15 @@ class OrderManager:
         new_order.sell_asset_id = sym_quote
         new_order.buy_asset_id = sym_base
         self.orders[new_order.trx_id] = new_order
-        self.api_server.place_order(new_order_json)
+        return self.api_server.place_order(new_order_json)
 
     def cancel(self, trx_id):
         cancel = self.signer.cancel(trx_id)
-        self.api_server.cancel_order(cancel)
+        return self.api_server.cancel_order(cancel)
+
+    def cancel_all(self, symbol):
+        cancel_all = self.signer.cancel_all(symbol)
+        return self.api_server.cancel_all_order(cancel_all)
 
 def process_binance_data(mdb, start, end):
     results = binance_api.get_kline("BTCUSDT", start, end)
