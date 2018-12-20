@@ -4,15 +4,17 @@ import logging
 import json
 
 SLEEP_INTERVAL = 5
-signer_endpoint_root = "http://127.0.0.1:8090/api/signer"
-api_endpoint_root = "http://127.0.0.1:8091/api/v1/"
+signer_endpoint_root = "http://127.0.0.1:8090/signer/v1"
+api_endpoint_root = "https://apitest.cybex.io/v1"
+
+logging.basicConfig(filename="log.txt")
 
 
 class CybexRestful:
     """Cybex Restful API sample implementation
 
     """
-    def __init__(self, api_root=None, clordid_prefix=None, timeout=None):
+    def __init__(self, api_root=api_endpoint_root, clordid_prefix=None, timeout=None):
         self.logger = logging.getLogger('root')
         self.api_root = api_root
 
@@ -68,19 +70,20 @@ class CybexRestful:
         return requests.get(url)
 
     def get_order_book(self):
-        pass
+        url = "%s/orderBook" % self.api_root
+        return requests.get(url)
 
     def get_position(self, seller_id):
         url = "%s/position" % self.api_root
         params = {'sellerId': seller_id}
         return requests.get(url, params=params)
 
-    def get_orders(self, seller_id):
+    def get_orders(self, account):
         url = "%s/order" % self.api_root
-        data = {'sellerId': seller_id}
+        data = {'accountName': account}
         headers = {'Content-type': 'application/json'}
-
-        return requests.post(url, json=data, headers=headers)
+        return requests.get(url, json=data, headers=headers)
+        #return requests.get(url, json=data)
 
     def get_bar_data(self):
         pass
@@ -92,72 +95,38 @@ class CybexRestful:
         pass
 
     def place_order(self, data):
-        url = "%s/order" % self.api_root
+        url = "%s/transaction" % self.api_root
         headers = {'Content-type': 'application/json'}
         return requests.post(url, json=data, headers=headers)
 
     def cancel_order(self, data):
-        url = "%s/order" % self.api_root
+        url = "%s/transaction" % self.api_root
         headers = {'Content-type': 'application/json'}
-        return requests.delete(url, json=data, headers=headers)
+        return requests.post(url, json=data, headers=headers)
 
     def cancel_all_orders(self, data):
-        url = "%s/order/cancelAll" % self.api_root
+        url = "%s/transaction" % self.api_root
         headers = {'Content-type': 'application/json'}
-        return requests.delete(url, json=data, headers=headers)
-
-class CybexSigner:
-    """Interact with the local signer process to produce
-
-    """
-
-    def send_order(self, symbol, price, quantity, buy):
-        dic = {}
-        dic['currencyPair'] = symbol
-        dic['price'] = price
-        dic['quantity'] = quantity
-        dic['buy'] = buy
-
-        print(dic)
-
-    def cancel_order(self):
-        pass
-
-    def cancel_all(self):
-        pass
+        return requests.post(url, json=data, headers=headers)
 
 
-class OrderManager:
-    def __init__(self):
-        pass
+class SignerConnector:
+    def __init__(self, api_root=signer_endpoint_root):
+        self.api_root = api_root
 
-    def send_order(self):
-        pass
+    def new_order(self, symbol, price, quantity, side):
+        url = "%s/newOrder" % self.api_root
+        data = {'assetPair': symbol, 'price': price, 'quantity': quantity, 'side': side}
+        headers = {'Content-type': 'application/json'}
+        return requests.post(url, json=data, headers=headers)
 
-    def cancel_order(self):
-        pass
+    def cancel(self, trxid):
+        url = "%s/cancelOrder" % self.api_root
+        data = {'originalTransactionId': trxid}
+        return requests.post(url, json=data)
 
-
-class AutoTrader:
-    def __init__(self):
-        pass
-
-
-class SampleMarketMaker:
-    def __init__(self, symbol=None):
-        self.symbol = symbol
-        pass
-
-    def run_loop(self):
-        # For every loop, do the following
-        # 1. Get market data
-        # 2. Get my open orders and trades
-        # 3. Update my position
-        # 4. Calculate what orders do I want to place now
-        # 5. Send the orders
-        # If any error occur, cancel all open orders and exit.
-
-        sleep(SLEEP_INTERVAL)
-
-
+    def cancel_all(self, symbol):
+        url = "%s/cancelAll" % self.api_root
+        data = {'assetPair': symbol}
+        return requests.post(url, json=data)
 
