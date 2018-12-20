@@ -94,21 +94,10 @@ class CybexRestful:
         # User can use these data to calculate other indicator.
         pass
 
-    def place_order(self, data):
+    def send_transaction(self, data):
         url = "%s/transaction" % self.api_root
         headers = {'Content-type': 'application/json'}
         return requests.post(url, json=data, headers=headers)
-
-    def cancel_order(self, data):
-        url = "%s/transaction" % self.api_root
-        headers = {'Content-type': 'application/json'}
-        return requests.post(url, json=data, headers=headers)
-
-    def cancel_all_orders(self, data):
-        url = "%s/transaction" % self.api_root
-        headers = {'Content-type': 'application/json'}
-        return requests.post(url, json=data, headers=headers)
-
 
 class SignerConnector:
     def __init__(self, api_root=signer_endpoint_root):

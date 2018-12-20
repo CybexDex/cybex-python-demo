@@ -398,6 +398,7 @@ class OrderManager:
                 # print(result.status_code)
 
     def sell(self, price, quantity):
+        price = round(price, 2)
         new_order_json = self.signer.new_order(self.assetPair, price, quantity, 'sell').json()
         new_order = self.parse_order_signer(new_order_json)
         if not new_order:
@@ -405,7 +406,7 @@ class OrderManager:
 
         new_order.assetPair = self.assetPair
         new_order.quantity = quantity
-        new_order.price = round(price, 2)
+        new_order.price = price
         new_order.side = 'sell'
 
         print(datetime.now(), "try to sell", new_order.quantity, "at", new_order.price, "trx_id", new_order.trx_id)
@@ -421,6 +422,7 @@ class OrderManager:
         return True
 
     def buy(self, price, quantity):
+        price = round(price, 2)
         new_order_json = self.signer.new_order(self.assetPair, price, quantity, 'buy').json()
         new_order = self.parse_order_signer(new_order_json)
         if not new_order:
@@ -428,7 +430,7 @@ class OrderManager:
 
         new_order.assetPair = self.assetPair
         new_order.quantity = quantity
-        new_order.price = round(price, 2)
+        new_order.price = price
         new_order.side = 'buy'
 
         print(datetime.now(), "try to buy", new_order.quantity, "at", new_order.price, "trx_id", new_order.trx_id)

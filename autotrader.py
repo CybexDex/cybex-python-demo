@@ -1,4 +1,4 @@
-from timeit import default_timer as timer
+import os
 import configparser
 import requests
 import sys
@@ -86,19 +86,30 @@ def process_huobi_data(mdb, start, end):
     except Exception:
         print('Unable to get data', sys.exc_info()[0])
 
+
 if __name__ == '__main__':
+
+    if not os.path.exists('config.ini'):
+        print('need to have config.ini')
+        exit(-1)
 
     config = configparser.ConfigParser()
     config.read('config.ini')
 
-    binance_api = BinanceRestful(key=config['Binance']['key'], secret=config['Binance']['secret'])
-
+    # binance_api = BinanceRestful(key=config['Binance']['key'], secret=config['Binance']['secret'])
     # result = binance_api.get_exchange_info()
     # print(result)
+    try:
+        huobi_api = HuobiApi(key=config['Huobi']['key'], secret=config['Huobi']['secret'])
+    except Exception:
+        print('need to have huobi api key and secret in the config_uat.ini')
+        exit(-1)
 
-    huobi_api = HuobiApi(key=config['Huobi']['key'], secret=config['Huobi']['secret'])
-
-    account = config['Cybex']['account']
+    try:
+        account = config['Cybex']['account']
+    except Exception:
+        print('need to have cybex account setting in the config_uat.ini')
+        exit(-1)
 
     mdb = MarketDataManager()
     om = OrderManager(account, symbol)
@@ -120,13 +131,13 @@ if __name__ == '__main__':
         # calculate how much historical data need to be requested
         now = datetime.now()
 
+        # calculate a few time related number
         now_s = int(time())
         start_s = (now_s - 120) * 1000
         end_s = now_s * 1000
-
         now_m = int(now_s / 60)
 
-        # process_binance_data(mdb, start, end)
+        # Get market data udpates
         process_huobi_data(mdb, start_s, end_s)
         bar_count = mdb.get_bar_count()
 
@@ -154,6 +165,7 @@ if __name__ == '__main__':
         # print('now', now, 'now_m', now_m, 'now_s', now_s, 'cut_off', cut_off)
 
         if now_m not in signal_slots and now_s > cut_off:
+            # If there is no action in this time slot, calculate to_trade and send order
             signal = mdb.check_signal(bar_count - 2)
 
             print('{0}, signal for slot {1} is {2}, pos {3}, pnl {4}'
