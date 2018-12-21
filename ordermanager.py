@@ -2,7 +2,7 @@ import sys
 import requests
 from enum import Enum
 from datetime import datetime, timedelta
-from cybexapi import SignerConnector, CybexRestful
+from cybexapi import SignerConnector, CybexRestful, CybexException
 
 FAST_PERIOD = 12
 SLOW_PERIOD = 26
@@ -276,12 +276,10 @@ class OrderManager:
                         order.order_status = OrderStatus.PendingCancel
 
         if pending_new_count > 1:
-            print(datetime.now(), 'too many pending new, wait and retry next round')
-            return None
+            raise CybexException('too many pending new, wait and retry next round')
 
         if pending_count > 3:
-            print(datetime.now(), 'too many pending, wait and retry next round')
-            return None
+            raise CybexException('too many pending, wait and retry next round')
 
         # Assume pending cancel can be cancelled.
         # Calculate pseudo_pos again
@@ -304,16 +302,15 @@ class OrderManager:
 
         if to_trade > 0:
             best_ask = orderbook.get_best_ask()
-            return self.buy(best_ask, to_trade)
+            self.buy(best_ask, to_trade)
+            return True
         elif to_trade < 0:
             best_bid = orderbook.get_best_bid()
-            return self.sell(best_bid, -1 * to_trade)
+            self.sell(best_bid, -1 * to_trade)
+            return True
 
     @staticmethod
     def parse_order_signer(order_data):
-        if 'Status' in order_data and order_data['Status'] == 'Failed':
-            return None
-
         o = Order()
         # o.buy_asset_id = order_data['minToReceive']['assetId']
         # o.to_receive = order_data['minToReceive']['amount']
@@ -354,17 +351,17 @@ class OrderManager:
     def update_orders(self):
         # noinspection PyBroadException
         try:
-            order_jsons = self.api_server.get_orders(self.account).json()
+            order_datas = self.api_server.get_orders(self.account)
 
-            for order_json in order_jsons:
-                order_update = OrderManager.parse_order_apiserver(order_json)
+            for order_data in order_datas:
+                order_update = OrderManager.parse_order_apiserver(order_data)
 
                 if order_update.trx_id not in self.orders:
                     # print('Unrecognized order {0}'.format(order_update.trx_id))
                     continue
 
                 if order_update.order_status == OrderStatus.Rejected:
-                    remark = order_json['remark']
+                    remark = order_data['remark']
                     print('{0}, Order {1} rejected. Reason : {2}'.format(datetime.now(), order_update.trx_id, remark))
                     self.orders.pop(order_update.trx_id, None)
                     continue
@@ -399,10 +396,8 @@ class OrderManager:
 
     def sell(self, price, quantity):
         price = round(price, 2)
-        new_order_json = self.signer.prepare_order_message(self.assetPair, price, quantity, 'sell').json()
-        new_order = self.parse_order_signer(new_order_json)
-        if not new_order:
-            return False
+        new_order_msg = self.signer.prepare_order_message(self.assetPair, price, quantity, 'sell')
+        new_order = self.parse_order_signer(new_order_msg)
 
         new_order.assetPair = self.assetPair
         new_order.quantity = quantity
@@ -411,22 +406,14 @@ class OrderManager:
 
         print(datetime.now(), "try to sell", new_order.quantity, "at", new_order.price, "trx_id", new_order.trx_id)
 
-        result = self.api_server.send_transaction(new_order_json).json()
-
-        if result['Status'] == 'Failed':
-            print('Send order failed, code', result['Code'], 'reason', result['Message'])
-            return False
+        self.api_server.send_transaction(new_order_msg)
 
         self.orders[new_order.trx_id] = new_order
 
-        return True
-
     def buy(self, price, quantity):
         price = round(price, 2)
-        new_order_json = self.signer.prepare_order_message(self.assetPair, price, quantity, 'buy').json()
-        new_order = self.parse_order_signer(new_order_json)
-        if not new_order:
-            return False
+        new_order_msg = self.signer.prepare_order_message(self.assetPair, price, quantity, 'buy')
+        new_order = self.parse_order_signer(new_order_msg)
 
         new_order.assetPair = self.assetPair
         new_order.quantity = quantity
@@ -435,24 +422,19 @@ class OrderManager:
 
         print(datetime.now(), "try to buy", new_order.quantity, "at", new_order.price, "trx_id", new_order.trx_id)
 
-        result = self.api_server.send_transaction(new_order_json).json()
-        if result['Status'] == 'Failed':
-            print('Send order failed, code', result['Code'], 'reason', result['Message'])
-            return False
+        self.api_server.send_transaction(new_order_msg)
 
         self.orders[new_order.trx_id] = new_order
-
-        return True
 
     def cancel(self, trx_id):
         print(datetime.now(), 'cancelling', trx_id)
         cancel = self.signer.prepare_cancel_message(trx_id)
-        return self.api_server.send_transaction(cancel.json())
+        self.api_server.send_transaction(cancel)
 
     def cancel_all(self, symbol):
         print(datetime.now(), 'cancelling all')
         cancel_all = self.signer.prepare_cancel_all_message(symbol)
-        return self.api_server.send_transaction(cancel_all.json())
+        self.api_server.send_transaction(cancel_all)
 
     def do_test_order(self):
         self.buy(50, 1)

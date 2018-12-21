@@ -170,7 +170,9 @@ if __name__ == '__main__':
 
             print('{0}, signal for slot {1} is {2}, pos {3}, pnl {4}'
                   .format(datetime.now(), now_m, signal, om.position, current_pnl))
-            result = om.handle_signal(signal, mdb.get_order_book())
-            if signal is None or result:
-                # record the signal
-                signal_slots[now_m] = signal
+            try:
+                result = om.handle_signal(signal, mdb.get_order_book())
+                if result is not None or signal is None:
+                    signal_slots[now_m] = signal
+            except Exception as e:
+                print('handle_signal encounter error', e)

@@ -35,12 +35,21 @@ class CybexRequestException(Exception):
     def __str__(self):
         return 'CybexRequestException: %s' % self.message
 
+
 class CybexSignerException(Exception):
     def __init__(self, message):
         self.message = message
 
     def __str__(self):
         return 'CybexSignerException: %s' % self.message
+
+
+class CybexException(Exception):
+    def __init__(self, message):
+        self.message = message
+
+    def __str__(self):
+        return 'CybexException: %s' % self.message
 
 
 class CybexRestful:
