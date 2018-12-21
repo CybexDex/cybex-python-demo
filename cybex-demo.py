@@ -1,17 +1,13 @@
-import configparser
 from time import sleep
 from cybexapi import SignerConnector, CybexRestful
 
 
 if __name__ == '__main__':
-    config = configparser.ConfigParser()
-    config.read('config_uat.ini')
-
-    signer = SignerConnector()
-    api_server = CybexRestful()
+    signer = SignerConnector(api_root="http://127.0.0.1:8090/signer/v1")
+    api_server = CybexRestful(api_root="https://api.cybex.io/v1")
 
     # Prepare order message using the signer
-    order_msg = signer.prepare_order_message('ETH/USDT', 80, 0.1, 'buy')
+    order_msg = signer.prepare_order_message(asset_pair='ETH/USDT', price=80, quantity=0.1, side='buy')
 
     trx_id = order_msg['transactionId']
 
