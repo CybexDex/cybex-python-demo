@@ -243,11 +243,11 @@ class OrderManager:
 
     def buy_one(self, orderbook):
         best_ask = orderbook.get_best_ask()
-        self.buy(best_ask, self.size)
+        self.buy(best_ask+0.2, self.size)
 
     def sell_one(self, orderbook):
         best_bid = orderbook.get_best_bid()
-        self.sell(best_bid, self.size)
+        self.sell(best_bid-0.2, self.size)
 
     def handle_signal(self, signal, orderbook):
         if signal is None:
@@ -395,6 +395,7 @@ class OrderManager:
                 # print(result.status_code)
 
     def sell(self, price, quantity):
+        quantity = round(quantity, 2)
         price = round(price, 2)
         new_order_msg = self.signer.prepare_order_message(self.assetPair, price, quantity, 'sell')
         new_order = self.parse_order_signer(new_order_msg)
@@ -406,11 +407,13 @@ class OrderManager:
 
         print(datetime.now(), "try to sell", new_order.quantity, "at", new_order.price, "trx_id", new_order.trx_id)
 
-        self.api_server.send_transaction(new_order_msg)
+        result = self.api_server.send_transaction(new_order_msg)
+        print('send order result:', result)
 
         self.orders[new_order.trx_id] = new_order
 
     def buy(self, price, quantity):
+        quantity = round(quantity, 2)
         price = round(price, 2)
         new_order_msg = self.signer.prepare_order_message(self.assetPair, price, quantity, 'buy')
         new_order = self.parse_order_signer(new_order_msg)
@@ -422,7 +425,8 @@ class OrderManager:
 
         print(datetime.now(), "try to buy", new_order.quantity, "at", new_order.price, "trx_id", new_order.trx_id)
 
-        self.api_server.send_transaction(new_order_msg)
+        result = self.api_server.send_transaction(new_order_msg)
+        print('send order result:', result)
 
         self.orders[new_order.trx_id] = new_order
 

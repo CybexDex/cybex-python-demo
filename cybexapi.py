@@ -112,7 +112,7 @@ class CybexRestful:
                 msg = 'Unknown error.'
                 if 'rejectReason' in data:
                     msg = data['rejectReason']
-                    raise CybexRequestException(msg)
+                raise CybexRequestException(msg)
             return data
         except ValueError:
             raise CybexRequestException('Invalid Response: %s' % response.text)

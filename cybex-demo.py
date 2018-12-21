@@ -16,7 +16,7 @@ if __name__ == '__main__':
     # sleep 5 seconds
     sleep(10)
 
-    # Try to can
+    # Prepare cancel message using the signer
     cancel_msg = signer.prepare_cancel_message(trx_id)
 
     cancel_result = api_server.send_transaction(cancel_msg)
