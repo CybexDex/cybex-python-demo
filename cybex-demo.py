@@ -1,12 +1,5 @@
-import os
 import configparser
-import requests
-import sys
-from datetime import datetime
-from time import sleep, time
-from binanceapi import BinanceRestful
-from huobiapi import HuobiApi
-from ordermanager import OrderManager, MarketDataManager, BarData
+from time import sleep
 from cybexapi import SignerConnector, CybexRestful
 
 
@@ -14,36 +7,20 @@ if __name__ == '__main__':
     config = configparser.ConfigParser()
     config.read('config_uat.ini')
 
-    # Send a order
-    asset_pair = 'ETH/USDT'
-    price = 90
-    quantity = 0.1
-    side = 'buy'
-
-    singer = SignerConnector()
+    signer = SignerConnector()
     api_server = CybexRestful()
 
-    # Submit order information to the signer.
-    # If successful, the result is the data object that is used to send to the api
-    # If unsuccessful, the result contains error message
-    order_data = singer.new_order(asset_pair, price, quantity, side).json()
+    # Prepare order message using the signer
+    order_msg = signer.prepare_order_message('ETH/USDT', 80, 0.1, 'buy')
 
-    if 'Status' in order_data and order_data['Status'] == 'Failed':
-        # Order error in singer
-        print(order_data['Message'])
-        exit(-1)
+    trx_id = order_msg['transactionId']
 
-    trx_id = order_data['transactionId']
-
-    result = api_server.send_transaction(order_data).json()
-    if result['Status'] == 'Failed':
-        print('Send order failed, code', result['Code'], 'reason', result['Message'])
-        exit(-1)
+    order_result = api_server.send_transaction(order_msg)
 
     # sleep 5 seconds
-    sleep(5)
+    sleep(10)
 
     # Try to can
-    cancel_data = singer.cancel(trx_id).json()
+    cancel_msg = signer.prepare_cancel_message(trx_id)
 
-    result = api_server.send_transaction(cancel_data)
+    cancel_result = api_server.send_transaction(cancel_msg)

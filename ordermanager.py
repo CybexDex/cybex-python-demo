@@ -399,7 +399,7 @@ class OrderManager:
 
     def sell(self, price, quantity):
         price = round(price, 2)
-        new_order_json = self.signer.new_order(self.assetPair, price, quantity, 'sell').json()
+        new_order_json = self.signer.prepare_order_message(self.assetPair, price, quantity, 'sell').json()
         new_order = self.parse_order_signer(new_order_json)
         if not new_order:
             return False
@@ -423,7 +423,7 @@ class OrderManager:
 
     def buy(self, price, quantity):
         price = round(price, 2)
-        new_order_json = self.signer.new_order(self.assetPair, price, quantity, 'buy').json()
+        new_order_json = self.signer.prepare_order_message(self.assetPair, price, quantity, 'buy').json()
         new_order = self.parse_order_signer(new_order_json)
         if not new_order:
             return False
@@ -446,12 +446,12 @@ class OrderManager:
 
     def cancel(self, trx_id):
         print(datetime.now(), 'cancelling', trx_id)
-        cancel = self.signer.cancel(trx_id)
+        cancel = self.signer.prepare_cancel_message(trx_id)
         return self.api_server.send_transaction(cancel.json())
 
     def cancel_all(self, symbol):
         print(datetime.now(), 'cancelling all')
-        cancel_all = self.signer.cancel_all(symbol)
+        cancel_all = self.signer.prepare_cancel_all_message(symbol)
         return self.api_server.send_transaction(cancel_all.json())
 
     def do_test_order(self):
