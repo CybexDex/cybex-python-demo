@@ -84,9 +84,9 @@ class CybexRestful:
 
     def get_orders(self, account):
         url = "%s/order" % self.api_root
-        data = {'accountName': account}
+        params = {'accountName': account}
         headers = {'Content-type': 'application/json'}
-        return self._handle_response(requests.get(url, json=data, headers=headers))
+        return self._handle_response(requests.get(url, params=params, headers=headers))
 
     def get_bar_data(self):
         pass

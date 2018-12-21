@@ -265,15 +265,17 @@ class OrderManager:
                 pending_count = pending_count + 1
             if order.order_status in {OrderStatus.PendingNew, OrderStatus.New, OrderStatus.PartiallyFilled}:
                 if target > 0 and order.side == 'sell':
-                    result = self.cancel(order.trx_id)
-                    if result.status_code == requests.codes.ok:
-                        # If it is not rejected, mark to pending cancel
+                    try:
+                        self.cancel(order.trx_id)
                         order.order_status = OrderStatus.PendingCancel
+                    except Exception as e:
+                        print('cancel error', e)
                 elif target < 0 and order.side == 'buy':
-                    result = self.cancel(order.trx_id)
-                    if result.status_code == requests.codes.ok:
-                        # If it is not rejected, mark to pending cancel
+                    try:
+                        self.cancel(order.trx_id)
                         order.order_status = OrderStatus.PendingCancel
+                    except Exception as e:
+                        print('cancel error', e)
 
         if pending_new_count > 1:
             raise CybexException('too many pending new, wait and retry next round')
@@ -389,10 +391,13 @@ class OrderManager:
     def cancel_old_orders(self):
         now = datetime.utcnow()
         for trx_id, order in self.orders.items():
+
             lapse = now - order.timestamp
             if lapse > timedelta(seconds=40) and order.order_status in {OrderStatus.New, OrderStatus.PartiallyFilled}:
-                result = self.cancel(order.trx_id)
-                # print(result.status_code)
+                try:
+                    self.cancel(order.trx_id)
+                except Exception as e:
+                    print('Cancel exception', e)
 
     def sell(self, price, quantity):
         quantity = round(quantity, 2)
@@ -433,12 +438,14 @@ class OrderManager:
     def cancel(self, trx_id):
         print(datetime.now(), 'cancelling', trx_id)
         cancel = self.signer.prepare_cancel_message(trx_id)
-        self.api_server.send_transaction(cancel)
+        result = self.api_server.send_transaction(cancel)
+        print('cancel result', result)
 
     def cancel_all(self, symbol):
         print(datetime.now(), 'cancelling all')
         cancel_all = self.signer.prepare_cancel_all_message(symbol)
-        self.api_server.send_transaction(cancel_all)
+        result = self.api_server.send_transaction(cancel_all)
+        print('cancel all result', result)
 
     def do_test_order(self):
         self.buy(50, 1)
