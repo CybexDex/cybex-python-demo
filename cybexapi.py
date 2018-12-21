@@ -99,6 +99,7 @@ class CybexRestful:
         headers = {'Content-type': 'application/json'}
         return requests.post(url, json=data, headers=headers)
 
+
 class SignerConnector:
     def __init__(self, api_root=signer_endpoint_root):
         self.api_root = api_root

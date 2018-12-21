@@ -411,7 +411,7 @@ class OrderManager:
 
         print(datetime.now(), "try to sell", new_order.quantity, "at", new_order.price, "trx_id", new_order.trx_id)
 
-        result = self.api_server.place_order(new_order_json).json()
+        result = self.api_server.send_transaction(new_order_json).json()
 
         if result['Status'] == 'Failed':
             print('Send order failed, code', result['Code'], 'reason', result['Message'])
@@ -435,7 +435,7 @@ class OrderManager:
 
         print(datetime.now(), "try to buy", new_order.quantity, "at", new_order.price, "trx_id", new_order.trx_id)
 
-        result = self.api_server.place_order(new_order_json).json()
+        result = self.api_server.send_transaction(new_order_json).json()
         if result['Status'] == 'Failed':
             print('Send order failed, code', result['Code'], 'reason', result['Message'])
             return False
@@ -447,12 +447,12 @@ class OrderManager:
     def cancel(self, trx_id):
         print(datetime.now(), 'cancelling', trx_id)
         cancel = self.signer.cancel(trx_id)
-        return self.api_server.cancel_order(cancel.json())
+        return self.api_server.send_transaction(cancel.json())
 
     def cancel_all(self, symbol):
         print(datetime.now(), 'cancelling all')
         cancel_all = self.signer.cancel_all(symbol)
-        return self.api_server.cancel_all_orders(cancel_all.json())
+        return self.api_server.send_transaction(cancel_all.json())
 
     def do_test_order(self):
         self.buy(50, 1)
