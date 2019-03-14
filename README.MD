@@ -1,13 +1,13 @@
 WELCOME TO Cybex Python API Demo
 ============================
 
-This is the python demo for using Cybex python API.
+This is the python demo for using [Cybex Python API](https://github.com/CybexDex/RomeAPI).
 
 
 Quick Start
 ------------
 
-Use `cybex_demo.py` as a quick start to using Cybex Python API.
+Use `cybex_demo.py` as a quick start to using [Cybex Python API](https://github.com/CybexDex/RomeAPI).
 
 Please prepare below information before using `cybex-demo.py`:
 
