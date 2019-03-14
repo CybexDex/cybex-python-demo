@@ -2,7 +2,7 @@ import sys
 import requests
 from enum import Enum
 from datetime import datetime, timedelta
-from cybexapi import SignerConnector, CybexRestful, CybexException
+from cybexapi_connector import SignerConnector, CybexRestful, CybexException
 
 FAST_PERIOD = 12
 SLOW_PERIOD = 26
