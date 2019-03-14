@@ -17,6 +17,17 @@ Please prepare below information before using `cybex-demo.py`:
 1. __Account Name__
 1. __Private Key__
 
+The *Account Name* is the same as the user name you use to logon to the CYBEX exchange at https://dex.cybex.io/.
+The *Private Key*, however, is __NOT__ the password you use for the web login.
+
+To find your private key, please go to go to https://olddex.cybex.io (Note that this is the old version):
+
+1. logon with your account name and password
+1. on the top left of the web page, go to ACCOUNT, then to the middle left of the page, click 'Permissions'
+1. under 'Active Permissions'->ACCOUNT/KEY/ADDRESS, click the public key string, which looks like CYB81SdxxxxxxxxxxxxxxxxxxxxxxxxJW
+1. on the pop up box titled 'Private key viewer', click 'SHOW', then the private key string will be shown under 'Private key (WIF - Wallet Import Format)', which looks like '5HyMuxxxxxxxxxxxxxxxxxxxxxxxxxx4ka'
+1. copy and save the private key string in a secure place to use with the CYBEX Python API
+
 __Usage:__
 ```
 python3 cybex-demo.py <account name> <private key>
