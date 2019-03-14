@@ -7,7 +7,7 @@ This is the python demo for [CYBEX ROME API](https://github.com/CybexDex/RomeAPI
 Quick Start
 ------------
 
-`cybex_demo.py` can be used as a quick start to use [Cybex ROME API](https://github.com/CybexDex/RomeAPI).
+`cybex_demo.py` can be used as a quick start to use [CYBEX ROME API](https://github.com/CybexDex/RomeAPI).
 
 The CYBEX ROME API is able to sign a transactions with the provided private key.
 The standalone *Cyb Signer* is __not required__ if you use the [CYBEX ROME API](https://github.com/CybexDex/RomeAPI).
