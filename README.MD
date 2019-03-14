@@ -1,13 +1,16 @@
 WELCOME TO Cybex Python API Demo
 ============================
 
-This is the python demo for using [Cybex Python API](https://github.com/CybexDex/RomeAPI).
+This is the python demo for [Cybex Python API](https://github.com/CybexDex/RomeAPI).
 
 
 Quick Start
 ------------
 
-Use `cybex_demo.py` as a quick start to using [Cybex Python API](https://github.com/CybexDex/RomeAPI).
+`cybex_demo.py` can be used as a quick start to use [Cybex Python API](https://github.com/CybexDex/RomeAPI).
+
+Cybex Python API is able to sign transactions with the provided private key.
+The standalone Cyb Signer is __not required__ if you use Cybex Python API.
 
 Please prepare below information before using `cybex-demo.py`:
 
@@ -20,8 +23,9 @@ python3 cybex-demo.py <account name> <private key>
 e.g. python3 cybex-demo.py test_user 5JbxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxXd
 ```
 
+__Note: please use python3, you may encounter problems if python2 is used.__    
 
-Features
+Cybex API Connector (required Cyb Signer) - to be deprecated
 ---------
 
 `cybexapi_connector.py` provides 2 wrappers. 
@@ -49,8 +53,13 @@ Whenever the MACD corss down,the auto-trader sells.
 This auto-trader will require a config.ini to contain API keys for the Huobi market 
 data api.
 
+__Note: currently auto trader is not updated to use latest cybex python api, it still requires cyb signer.__
 
 
+Cyb Signer
+------------
+
+A standalone [Cyb Signer](https://github.com/CybexDex/cyb-signer) written in Java, it provides a way to sign a transaction through RESTful API.    
 
 
 
