@@ -39,6 +39,11 @@ if __name__ == '__main__':
 
     order_transaction_id = None
 
+    # NOTES:
+    # Two orders are placed below (one buy order, one sell order)
+    # The buy order is cancelled by transaction Id through the cancel_order API call.
+    # The sell order is cancelled by the cancell_all API call.
+
     # place a buy order at level 2 price
     if len(order_book["bids"]) > 1:
         quantity = 0.01
