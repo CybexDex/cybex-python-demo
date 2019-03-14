@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from cybexapi.connect import Cybex
+from romeapi.connect import Cybex
 import json
 import sys
 
