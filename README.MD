@@ -7,20 +7,20 @@ This is the python demo for [CYBEX ROME API](https://github.com/CybexDex/RomeAPI
 Quick Start
 ------------
 
-`cybex_demo.py` can be used as a quick start to use [CYBEX ROME API](https://github.com/CybexDex/RomeAPI).
+The demo application`cybex_demo.py` can be used as a quick start to the [CYBEX ROME API](https://github.com/CybexDex/RomeAPI).
 
-The CYBEX ROME API is able to sign a transactions with the provided private key.
+The CYBEX ROME API is able to sign transactions with the provided private key.
 The standalone *Cyb Signer* is __not required__ if you use the [CYBEX ROME API](https://github.com/CybexDex/RomeAPI).
 
-Please prepare below information before using `cybex-demo.py`:
+Please prepare the below information before using `cybex-demo.py`:
 
 1. __Account Name__
 1. __Private Key__
 
-The *Account Name* is the same as the user name you use to logon to the CYBEX exchange at https://dex.cybex.io/.
-The *Private Key*, however, is __NOT__ the password you use for the web login.
+The *Account Name* is the same as the cloud wallet account name you use to logon to the CYBEX exchange at https://dex.cybex.io/.
+The *Private Key*, however, is __NOT__ the password you use for the web logon.
 
-To find your private key, please go to go to https://olddex.cybex.io (Note that this is the old version):
+To find your private key, go to https://olddex.cybex.io (NOTE that this is the old version):
 
 1. logon with your account name and password
 1. on the top left of the web page, go to ACCOUNT, then to the middle left of the page, click 'Permissions'
@@ -34,12 +34,12 @@ python3 cybex-demo.py <account name> <private key>
 e.g. python3 cybex-demo.py test_user 5JbxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxXd
 ```
 
-__Note: Please use python3, you may encounter problems if python2 is used.__
+__NOTE: Please use python3, you may encounter problems if python2 is used.__
 
 Cybex API Connector (Cyb Signer required) - to be deprecated
 ---------
 
-`cybexapi_connector.py` provides 2 wrappers.
+`cybexapi_connector.py` provides two wrappers.
 
 One wraps around the CYBEX Restful API server.
 
