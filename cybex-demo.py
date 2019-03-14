@@ -1,5 +1,5 @@
-from time import sleep
-from cybexapi_connector import CybexRestful
+#!/usr/bin/python3
+
 from cybexapi.connect import Cybex
 import json
 import sys
@@ -12,15 +12,13 @@ def format_response(response):
 if __name__ == '__main__':
 
     if len(sys.argv) < 2:
-        print("Usage: ", sys.argv[0], '<account_id> <private_key>')
+        print("Usage: ", sys.argv[0], '<account name> <private_key>')
         sys.exit()
 
-    api_server = CybexRestful(api_root="https://apitest.cybex.io/v1")
-
-    account = sys.argv[1]
+    account_name = sys.argv[1]
     key = sys.argv[2]
 
-    cybex = Cybex(account=account, key=key, env='uat')
+    cybex = Cybex(accountName=account_name, key=key, env='prod')
 
     markets = cybex.load_markets()
     print('market:')
@@ -39,7 +37,7 @@ if __name__ == '__main__':
 
     # place a buy order at level 2 price
     if len(order_book["bids"]) > 1:
-        quantity = 0.1
+        quantity = 0.01
         price = order_book["bids"][1][0]
         print('buy ', asset_pair, quantity, '@', price)
         buy_order = cybex.create_limit_buy_order(asset_pair, quantity, price)
@@ -47,7 +45,7 @@ if __name__ == '__main__':
 
     # place a sell order at level 2 price
     if len(order_book["asks"]) > 1:
-        quantity = 0.1
+        quantity = 0.01
         price = order_book["asks"][1][0]
         print('sell', asset_pair, quantity, '@', price)
         sell_order = cybex.create_limit_sell_order(asset_pair, quantity, price)
@@ -59,8 +57,6 @@ if __name__ == '__main__':
 
     # market_sell = cybex.create_market_sell_order(asset_pair, 0.1)
     # print(market_sell)
-
-    sleep(10)
 
     # cancel all orders
     cancel_all_order = cybex.cancel_all(asset_pair)
