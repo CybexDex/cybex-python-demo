@@ -24,10 +24,12 @@ if __name__ == '__main__':
     print('market:')
     print(format_response(markets))
 
+    # get account position
     balance = cybex.fetch_balance()
     print('balance:')
     print(format_response(balance))
 
+    # use ARENA.ETH/ARENA.USDT for CYBEX Trading Contest
     asset_pair = 'ETH/USDT'
 
     # fetch two levels
@@ -35,19 +37,23 @@ if __name__ == '__main__':
 
     print(format_response(order_book))
 
+    order_transaction_id = None
+
     # place a buy order at level 2 price
     if len(order_book["bids"]) > 1:
         quantity = 0.01
         price = order_book["bids"][1][0]
         print('buy ', asset_pair, quantity, '@', price)
-        buy_order = cybex.create_limit_buy_order(asset_pair, quantity, price)
-        print(buy_order)
+        order_transaction_id, result = cybex.create_limit_buy_order(asset_pair, quantity, price)
+        print(result)
 
     # place a sell order at level 2 price
     if len(order_book["asks"]) > 1:
         quantity = 0.01
         price = order_book["asks"][1][0]
         print('sell', asset_pair, quantity, '@', price)
+        # if you need order transaction id, you can do:
+        # order_transaction_id, result = cybex.create_limit_sell_order(asset_pair, quantity, price)
         sell_order = cybex.create_limit_sell_order(asset_pair, quantity, price)
         print(sell_order)
 
@@ -57,6 +63,10 @@ if __name__ == '__main__':
 
     # market_sell = cybex.create_market_sell_order(asset_pair, 0.1)
     # print(market_sell)
+
+    if order_transaction_id is not None:
+        cancel_order = cybex.cancel_order(order_transaction_id)
+        print(cancel_order)
 
     # cancel all orders
     cancel_all_order = cybex.cancel_all(asset_pair)
