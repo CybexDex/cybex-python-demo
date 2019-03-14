@@ -9,15 +9,15 @@ Quick Start
 
 Use `cybex_demo.py` as a quick start to using Cybex Python API.
 
-Please prepare below information before using `cybex-demo.py`
+Please prepare below information before using `cybex-demo.py`:
 
-1. __account id__
-1. __private key__
+1. __Account Name__
+1. __Private Key__
 
 __Usage:__
 ```
-python3 cybex-demo.py <account id> <private key>
-e.g. python3 cybex-demo.py 1.2.40xxx 5JbxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxXd
+python3 cybex-demo.py <account name> <private key>
+e.g. python3 cybex-demo.py test_user 5JbxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxXd
 ```
 
 
