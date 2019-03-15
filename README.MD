@@ -12,12 +12,24 @@ The demo application`cybex_demo.py` can be used as a quick start to the [CYBEX R
 The CYBEX ROME API is able to sign transactions with the provided private key.
 The standalone *Cyb Signer* is __not required__ if you use the [CYBEX ROME API](https://github.com/CybexDex/RomeAPI).
 
+### Use Password for Authentication (Recommended)
+
 Please prepare the below information before using `cybex-demo.py`:
 
 1. __Account Name__
-1. __Private Key__
+1. __Password__
+ 
+The *Account Name* and *Password* are the cloud wallet account name and password you use to logon to the CYBEX exchange at https://dex.cybex.io/.
 
-The *Account Name* is the same as the cloud wallet account name you use to logon to the CYBEX exchange at https://dex.cybex.io/.
+__Usage:__
+```
+python3 cybex-demo.py -n <account name> -p <password>
+e.g. python3 cybex-demo.py -n test_user -p xxxxxxxx
+```
+
+### Use Private Key for Authentication (Optional)
+
+The *Private Key* can also be used for authentication to use the ROME API.
 The *Private Key*, however, is __NOT__ the password you use for the web logon.
 
 To find your private key, go to https://olddex.cybex.io (NOTE that this is the old version):
@@ -30,8 +42,8 @@ To find your private key, go to https://olddex.cybex.io (NOTE that this is the o
 
 __Usage:__
 ```
-python3 cybex-demo.py <account name> <private key>
-e.g. python3 cybex-demo.py test_user 5JbxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxXd
+python3 cybex-demo.py -n <account name> -k <private key>
+e.g. python3 cybex-demo.py -n test_user -k 5JbxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxXd
 ```
 
 __NOTE: Please use python3, you may encounter problems if python2 is used.__
