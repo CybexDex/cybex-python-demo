@@ -37,13 +37,12 @@ Whenever the MACD corss down,the auto-trader sells.
 This auto-trader will require a config.ini to contain API keys for the Huobi market 
 data api.
 
-__Note: Currently auto trader is not updated to use the latest CYBEX ROME API, it still requires cyb signer.__
+__NOTE: Currently auto trader is not updated to use the latest CYBEX ROME API, it still requires *cyb signer* (see below).__
 
 
 ---------------
 
-Optional Usage - To Be Deprecated
---------------
+## Optional Usage - To Be Deprecated
 
 ### Use Private Key for Authentication
 
