@@ -3,22 +3,39 @@
 from romeapi.connect import Cybex
 import json
 import sys
+import time
+import argparse
 
 
 def format_response(response):
     return json.dumps(response, indent=1)
 
 
+def print_usage(prog):
+    print(prog, "-n <account name> -p <password> or -n <account name> -k <private key>")
+    sys.exit(0)
+
+
 if __name__ == '__main__':
 
-    if len(sys.argv) < 2:
-        print("Usage: ", sys.argv[0], '<account name> <private_key>')
-        sys.exit()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-n", "--account_name", help="Account Name")
+    parser.add_argument("-k", "--private_key", help="Private Key")
+    parser.add_argument("-p", "--password", help="Logon Password")
+    args = parser.parse_args()
 
-    account_name = sys.argv[1]
-    key = sys.argv[2]
-
-    cybex = Cybex(accountName=account_name, key=key, env='prod')
+    if args.account_name:
+        account_name = args.account_name
+        if args.private_key:
+            key = args.private_key
+            cybex = Cybex(accountName=account_name, key=key, env='prod')
+        elif args.password:
+            password = args.password
+            cybex = Cybex(accountName=account_name, password=password, env='prod')
+        else:
+            print_usage(sys.argv[0])
+    else:
+        print_usage(sys.argv[0])
 
     markets = cybex.load_markets()
     print('market:')
