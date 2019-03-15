@@ -23,6 +23,7 @@ __Usage:__
 python3 cybex-demo.py -n <account name> -p <password>
 e.g. python3 cybex-demo.py -n test_user -p xxxxxxxx
 ```
+__NOTE: Please use python3, you may encounter problems if python2 is used.__
 
 Auto Trader
 -----------
@@ -42,7 +43,7 @@ __NOTE: Currently auto trader is not updated to use the latest CYBEX ROME API, i
 
 ---------------
 
-## Optional Usage - To Be Deprecated
+## Optional Usage
 
 ### Use Private Key for Authentication
 
@@ -63,9 +64,7 @@ python3 cybex-demo.py -n <account name> -k <private key>
 e.g. python3 cybex-demo.py -n test_user -k 5JbxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxXd
 ```
 
-__NOTE: Please use python3, you may encounter problems if python2 is used.__
-
-### Cybex API Connector (Cyb Signer required)
+### Cybex API Connector (Cyb Signer Required)
 
 
 `cybexapi_connector.py` provides two wrappers.
