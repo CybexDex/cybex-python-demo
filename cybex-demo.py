@@ -54,6 +54,12 @@ if __name__ == '__main__':
 
     print(format_response(order_book))
 
+    # fetch kline data
+    # optional parameters can also be set in the last parameter
+    # e.g. {'limit': 5, 'startTime': 1584368460000, 'endTime': 1584368519999}
+    klines = cybex.fetch_ohlcv(asset_pair, '1m', {'limit': 5})
+    print('klines:', format_response(klines))
+
     order_transaction_id = None
 
     # NOTES:
