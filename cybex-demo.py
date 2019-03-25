@@ -55,8 +55,7 @@ if __name__ == '__main__':
     print(format_response(order_book))
 
     # fetch last 5-minute kline data
-    # optional parameters (startTime,endTime,etc) can also be set in the last parameter
-    klines = cybex.fetch_ohlcv(asset_pair, '1m', {'limit': 5})
+    klines = cybex.fetch_ohlcv(asset_pair, interval='1m', limit=5)
     print('klines:', format_response(klines))
 
     order_transaction_id = None
