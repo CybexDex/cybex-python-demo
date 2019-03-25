@@ -4,11 +4,12 @@ import requests
 import sys
 from datetime import datetime
 from time import sleep, time
-from binanceapi import BinanceRestful
-from huobiapi import HuobiApi
+# from binanceapi import BinanceRestful
+# from huobiapi import HuobiApi
 from ordermanager import OrderManager, MarketDataManager, BarData
 import threading
 
+import ccxt
 
 sym_base = 'ETH'
 sym_quote = 'USDT'
@@ -16,6 +17,8 @@ symbol = 'ETH/USDT'
 
 mdb = None
 om = None
+
+config = {'apiKey': "key", 'secret': "secret", 'enableRateLimit': True}
 
 
 def input_thread():
@@ -33,28 +36,28 @@ thread.daemon = True
 thread.start()
 
 
-def process_binance_data(mdb, start, end):
-    results = binance_api.get_kline("BTCUSDT", start, end)
-    for bar_data in results:
-        bar = BarData()
-        bar.start_time = datetime.fromtimestamp(bar_data[0]/1000.0)
-        bar.px_open = float(bar_data[1])
-        bar.px_high = float(bar_data[2])
-        bar.px_low = float(bar_data[3])
-        bar.px_close = float(bar_data[4])
-        bar.volume = float(bar_data[5])
-        bar.end_time = datetime.fromtimestamp(bar_data[0]/1000.0)
-
-        mdb.update_bar_data(bar)
-
-        print(bar.start_time, bar.px_open, bar.px_high, bar.px_low, bar.px_close, bar.volume)
+# def process_binance_data(mdb, start, end):
+#     results = binance_api.get_kline("BTCUSDT", start, end)
+#     for bar_data in results:
+#         bar = BarData()
+#         bar.start_time = datetime.fromtimestamp(bar_data[0]/1000.0)
+#         bar.px_open = float(bar_data[1])
+#         bar.px_high = float(bar_data[2])
+#         bar.px_low = float(bar_data[3])
+#         bar.px_close = float(bar_data[4])
+#         bar.volume = float(bar_data[5])
+#         bar.end_time = datetime.fromtimestamp(bar_data[0]/1000.0)
+#
+#         mdb.update_bar_data(bar)
+#
+#         print(bar.start_time, bar.px_open, bar.px_high, bar.px_low, bar.px_close, bar.volume)
 
 
 def process_huobi_data(mdb, start, end):
     try:
         # start_time = timer()
-        data = huobi_api.get_ohlcv(symbol, start, end)
-        order_book = huobi_api.get_order_book(symbol)
+        data = huobi_api.fetch_ohlcv(symbol, start, end)
+        order_book = huobi_api.fetch_order_book(symbol)
         # end_time = timer()
         # print(end_time - start_time)
         # Usually this takes 3.9 seconds
@@ -89,21 +92,18 @@ def process_huobi_data(mdb, start, end):
 
 if __name__ == '__main__':
 
-    if not os.path.exists('config.ini'):
-        print('need to have config.ini')
-        exit(-1)
-
-    config = configparser.ConfigParser()
-    config.read('config.ini')
-
-    # binance_api = BinanceRestful(key=config['Binance']['key'], secret=config['Binance']['secret'])
-    # result = binance_api.get_exchange_info()
-    # print(result)
-    try:
-        huobi_api = HuobiApi(key=config['Huobi']['key'], secret=config['Huobi']['secret'])
-    except Exception:
-        print('need to have huobi api key and secret in the config_uat.ini')
-        exit(-1)
+    # if not os.path.exists('config.ini'):
+    #     print('need to have config.ini')
+    #     exit(-1)
+    #
+    # config = configparser.ConfigParser()
+    # config.read('config.ini')
+    #
+    # # binance_api = BinanceRestful(key=config['Binance']['key'], secret=config['Binance']['secret'])
+    # # result = binance_api.get_exchange_info()
+    # # print(result)
+    # try:
+    huobi_api = ccxt.huobipro()
 
     try:
         account = config['Cybex']['account']
