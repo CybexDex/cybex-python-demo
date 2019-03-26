@@ -1,11 +1,7 @@
-import os
-import configparser
 import requests
 import sys
 from datetime import datetime
-from time import sleep, time
-# from binanceapi import BinanceRestful
-# from huobiapi import HuobiApi
+from time import time
 from ordermanager import OrderManager, MarketDataManager, BarData
 import threading
 
@@ -17,9 +13,6 @@ symbol = 'ETH/USDT'
 
 mdb = None
 om = None
-
-config = {'apiKey': "key", 'secret': "secret", 'enableRateLimit': True}
-
 
 def input_thread():
     while True:
