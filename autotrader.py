@@ -49,8 +49,8 @@ thread.start()
 def process_huobi_data(mdb, start, end):
     try:
         # start_time = timer()
-        data = huobi_api.fetch_ohlcv(symbol, start, end)
-        order_book = huobi_api.fetch_order_book(symbol)
+        data = huobi_api.fetch_ohlcv(symbol, since=start)
+        order_book = huobi_api.fetch_order_book(symbol, limit=10)
         # end_time = timer()
         # print(end_time - start_time)
         # Usually this takes 3.9 seconds
