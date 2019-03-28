@@ -1,8 +1,9 @@
 import sys
-import requests
 from enum import Enum
 from datetime import datetime, timedelta
-from cybexapi_connector import SignerConnector, CybexRestful, CybexException
+# from cybexapi_connector import SignerConnector, CybexRestful, CybexException
+
+from romeapi import CybexException
 
 FAST_PERIOD = 12
 SLOW_PERIOD = 26
@@ -18,24 +19,24 @@ class OrderStatus(Enum):
     Rejected = '8'
     PendingNew = 'A'
 
-
+# Order(order_transaction_id, assetPair, quantity, price, side)
 class Order:
-    def __init__(self):
+    def __init__(self, transaction_id='', assetPair=None, quantity=0.0, price=0.0, side=None):
         self.seller = None
         self.order_sequence = 0
         self.order_status = OrderStatus.PendingNew
-        self.side = None
-        self.assetPair = None
-        self.quantity = 0
-        self.price = 0
+        self.side = side
+        self.assetPair = assetPair
+        self.quantity = quantity
+        self.price = price
         self.filled = 0
         self.avg_price = 0
-        self.trx_id = ''
+        self.trx_id = transaction_id
         self.timestamp = datetime.utcnow()
 
 
 class BarData:
-    def __init__(self):
+    def __init__(self, bar_data=None):
         self.start_time = datetime.fromtimestamp(0)
         self.px_open = 0.0
         self.px_high = 0.0
@@ -51,11 +52,27 @@ class BarData:
         self.macd_signal = 0
         self.finalized = False
 
+        if bar_data and len(bar_data)>5:
+            self.start_time = datetime.fromtimestamp(bar_data[0]/1000.0)
+            self.px_open = float(bar_data[1])
+            self.px_high = float(bar_data[2])
+            self.px_low = float(bar_data[3])
+            self.px_close = float(bar_data[4])
+            self.volume = float(bar_data[5])
+
 
 class OrderBook:
-    def __init__(self):
+    def __init__(self, order_book_dic=None):
         self.bids = []
         self.asks = []
+        if order_book_dic and "bids" in order_book_dic and "asks" in order_book_dic:
+            self.set_orderbook(order_book_dic)
+
+    def set_orderbook(self, order_book_dic):
+        if order_book_dic and "bids" in order_book_dic and "asks" in order_book_dic:
+            self.bids = order_book_dic["bids"]
+            self.asks = order_book_dic["asks"]
+
 
     def get_best_bid(self):
         if len(self.bids) > 0:
@@ -78,8 +95,16 @@ class MarketDataManager:
     def __init__(self):
         self.bars = []
         self.order_book = OrderBook()
-        self.best_bid = 0
-        self.best_ask = 0
+        # self.best_bid = 0
+        # self.best_ask = 0
+
+    @staticmethod
+    def best_bid(self):
+        return self.order_book.get_best_bid()
+
+    @staticmethod
+    def best_bask(self):
+        return self.order_book.get_best_ask()
 
     def get_order_book(self):
         return self.order_book
@@ -185,8 +210,8 @@ class MarketDataManager:
 
 class OrderManager:
 
-    def __init__(self, account, assetPair):
-        self.account = account
+    def __init__(self, cybex, assetPair):
+        # self.account = account
         self.assetPair = assetPair
         self.sym_base = assetPair.split('/')[0]
         self.sym_quote = assetPair.split('/')[1]
@@ -200,8 +225,8 @@ class OrderManager:
         self.position = 0
         self.size = 0.5
         self.last_price = 0.0
-        self.signer = SignerConnector()
-        self.api_server = CybexRestful()
+        # self.signer = SignerConnector()
+        self.cybex = cybex
 
     def calculate_pnl(self, orderbook):
         total_pnl = 0
@@ -241,13 +266,36 @@ class OrderManager:
 
         self.position = self.total_buy - self.total_sell
 
-    def buy_one(self, orderbook):
-        best_ask = orderbook.get_best_ask()
-        self.buy(best_ask+0.2, self.size)
+    def market_buy_one(self):
 
-    def sell_one(self, orderbook):
-        best_bid = orderbook.get_best_bid()
-        self.sell(best_bid-0.2, self.size)
+        bid, ask = self.cybex.fetch_best_price(self.assetPair)
+        # put some buffer in price
+        order_transaction_id, result = self.cybex.create_order(self.assetPair, 'buy', self.size, float(ask) * 1.01)
+
+        print(datetime.now(), "try to buy", self.size, "trx_id", order_transaction_id)
+
+        self.orders[order_transaction_id] = Order(order_transaction_id, self.assetPair, self.size, float(ask) * 1.01, 'buy')
+
+    def market_sell_one(self):
+
+        bid, ask = self.cybex.fetch_best_price(self.assetPair)
+        # put some buffer in price
+        order_transaction_id, result = self.cybex.create_order(self.assetPair, 'sell', self.size, float(bid) * 0.99)
+
+        print(datetime.now(), "try to sell", self.size, "trx_id", order_transaction_id)
+
+        self.orders[order_transaction_id] = Order(order_transaction_id, self.assetPair, self.size, float(bid) * 0.99, 'buy')
+
+    def cancel(self, trx_id):
+        print(datetime.now(), 'cancelling', trx_id)
+        result = self.cybex.cancel_order(trx_id)
+        print('cancel result', result)
+
+    def cancel_all(self, symbol):
+        print(datetime.now(), 'cancelling all')
+
+        result = self.cybex.cancel_all(symbol)
+        print('cancel all result', result)
 
     def handle_signal(self, signal, orderbook):
         if signal is None:
@@ -311,16 +359,16 @@ class OrderManager:
             self.sell(best_bid, -1 * to_trade)
             return True
 
-    @staticmethod
-    def parse_order_signer(order_data):
-        o = Order()
-        # o.buy_asset_id = order_data['minToReceive']['assetId']
-        # o.to_receive = order_data['minToReceive']['amount']
-        # o.sell_asset_id = order_data['amountToSell']['assetId']
-        # o.to_sell = order_data['amountToSell']['amount']
-        o.trx_id = order_data['transactionId']
-        o.order_status = None
-        return o
+    # @staticmethod
+    # def parse_order_signer(order_data):
+    #     o = Order()
+    #     # o.buy_asset_id = order_data['minToReceive']['assetId']
+    #     # o.to_receive = order_data['minToReceive']['amount']
+    #     # o.sell_asset_id = order_data['amountToSell']['assetId']
+    #     # o.to_sell = order_data['amountToSell']['amount']
+    #     o.trx_id = order_data['transactionId']
+    #     o.order_status = None
+    #     return o
 
     @staticmethod
     def parse_order_apiserver(order_data):
@@ -353,7 +401,7 @@ class OrderManager:
     def update_orders(self):
         # noinspection PyBroadException
         try:
-            order_datas = self.api_server.get_orders(self.account)
+            order_datas = self.cybex.fetch_orders()
 
             for order_data in order_datas:
                 order_update = OrderManager.parse_order_apiserver(order_data)
@@ -399,53 +447,4 @@ class OrderManager:
                 except Exception as e:
                     print('Cancel exception', e)
 
-    def sell(self, price, quantity):
-        quantity = round(quantity, 2)
-        price = round(price, 2)
-        new_order_msg = self.signer.prepare_order_message(self.assetPair, price, quantity, 'sell')
-        new_order = self.parse_order_signer(new_order_msg)
 
-        new_order.assetPair = self.assetPair
-        new_order.quantity = quantity
-        new_order.price = price
-        new_order.side = 'sell'
-
-        print(datetime.now(), "try to sell", new_order.quantity, "at", new_order.price, "trx_id", new_order.trx_id)
-
-        result = self.api_server.send_transaction(new_order_msg)
-        print('send order result:', result)
-
-        self.orders[new_order.trx_id] = new_order
-
-    def buy(self, price, quantity):
-        quantity = round(quantity, 2)
-        price = round(price, 2)
-        new_order_msg = self.signer.prepare_order_message(self.assetPair, price, quantity, 'buy')
-        new_order = self.parse_order_signer(new_order_msg)
-
-        new_order.assetPair = self.assetPair
-        new_order.quantity = quantity
-        new_order.price = price
-        new_order.side = 'buy'
-
-        print(datetime.now(), "try to buy", new_order.quantity, "at", new_order.price, "trx_id", new_order.trx_id)
-
-        result = self.api_server.send_transaction(new_order_msg)
-        print('send order result:', result)
-
-        self.orders[new_order.trx_id] = new_order
-
-    def cancel(self, trx_id):
-        print(datetime.now(), 'cancelling', trx_id)
-        cancel = self.signer.prepare_cancel_message(trx_id)
-        result = self.api_server.send_transaction(cancel)
-        print('cancel result', result)
-
-    def cancel_all(self, symbol):
-        print(datetime.now(), 'cancelling all')
-        cancel_all = self.signer.prepare_cancel_all_message(symbol)
-        result = self.api_server.send_transaction(cancel_all)
-        print('cancel all result', result)
-
-    def do_test_order(self):
-        self.buy(50, 1)

@@ -6,10 +6,14 @@ from ordermanager import OrderManager, MarketDataManager, BarData
 import threading
 
 import ccxt
+from romeapi import Cybex
 
 sym_base = 'ETH'
 sym_quote = 'USDT'
 symbol = 'ETH/USDT'
+
+ACCOUNTNAME = ''
+PASSWORD = ''
 
 mdb = None
 om = None
@@ -19,63 +23,25 @@ def input_thread():
         cmd = input()
         print(datetime.now(), 'Got a command', cmd)
         if cmd == '+':
-            om.buy_one(mdb.get_order_book())
+            om. market_buy_one()
         elif cmd == '-':
-            om.sell_one(mdb.get_order_book())
+            om.market_sell_one()
 
 
 thread = threading.Thread(target=input_thread)
 thread.daemon = True
 thread.start()
 
-
-# def process_binance_data(mdb, start, end):
-#     results = binance_api.get_kline("BTCUSDT", start, end)
-#     for bar_data in results:
-#         bar = BarData()
-#         bar.start_time = datetime.fromtimestamp(bar_data[0]/1000.0)
-#         bar.px_open = float(bar_data[1])
-#         bar.px_high = float(bar_data[2])
-#         bar.px_low = float(bar_data[3])
-#         bar.px_close = float(bar_data[4])
-#         bar.volume = float(bar_data[5])
-#         bar.end_time = datetime.fromtimestamp(bar_data[0]/1000.0)
-#
-#         mdb.update_bar_data(bar)
-#
-#         print(bar.start_time, bar.px_open, bar.px_high, bar.px_low, bar.px_close, bar.volume)
-
-
 def process_huobi_data(mdb, start, end):
     try:
-        # start_time = timer()
-        data = huobi_api.fetch_ohlcv(symbol, start, end)
-        order_book = huobi_api.fetch_order_book(symbol)
-        # end_time = timer()
-        # print(end_time - start_time)
-        # Usually this takes 3.9 seconds
+
+        order_book = huobi_api.fetch_order_book(symbol, limit=10)
+        mdb.order_book.set_orderbook(order_book)
+
+        data = huobi_api.fetch_ohlcv(symbol, since=start)
 
         for bar_data in data:
-            bar = BarData()
-            bar.start_time = datetime.fromtimestamp(bar_data[0]/1000.0)
-            bar.px_open = float(bar_data[1])
-            bar.px_high = float(bar_data[2])
-            bar.px_low = float(bar_data[3])
-            bar.px_close = float(bar_data[4])
-            bar.volume = float(bar_data[5])
-
-            mdb.update_bar_data(bar)
-
-            # print(bar.start_time, bar.px_open, bar.px_high, bar.px_low, bar.px_close, bar.volume)
-        # print('got', len(results), 'bars', results)
-
-        mdb.order_book.bids = order_book['bids']
-        mdb.order_book.asks = order_book['asks']
-
-        mdb.best_bid = mdb.order_book.bids[0][0]
-        mdb.best_ask = mdb.order_book.asks[0][0]
-
-        # print('{0:.3f} {1:.3f}'.format(mdb.best_bid, mdb.best_ask))
+            mdb.update_bar_data(BarData(bar_data))
 
     except requests.exceptions.HTTPError:
         print('http error, no matter, do it next time')
@@ -85,27 +51,13 @@ def process_huobi_data(mdb, start, end):
 
 if __name__ == '__main__':
 
-    # if not os.path.exists('config.ini'):
-    #     print('need to have config.ini')
-    #     exit(-1)
-    #
-    # config = configparser.ConfigParser()
-    # config.read('config.ini')
-    #
-    # # binance_api = BinanceRestful(key=config['Binance']['key'], secret=config['Binance']['secret'])
-    # # result = binance_api.get_exchange_info()
-    # # print(result)
-    # try:
+    # no need for credentials
     huobi_api = ccxt.huobipro()
-
-    try:
-        account = config['Cybex']['account']
-    except Exception:
-        print('need to have cybex account setting in the config_uat.ini')
-        exit(-1)
+    # provide accountname/password,
+    cybex = Cybex(accountName=ACCOUNTNAME, password=PASSWORD)
 
     mdb = MarketDataManager()
-    om = OrderManager(account, symbol)
+    om = OrderManager(cybex, symbol)
 
     # om.do_test_order()
 
