@@ -286,6 +286,26 @@ class OrderManager:
 
         self.orders[order_transaction_id] = Order(order_transaction_id, self.assetPair, self.size, float(bid) * 0.99, 'buy')
 
+    def market_buy(self, size_to_buy):
+
+        bid, ask = self.cybex.fetch_best_price(self.assetPair)
+        # put some buffer in price
+        order_transaction_id, result = self.cybex.create_order(self.assetPair, 'buy', size_to_buy, float(ask) * 1.01)
+
+        print(datetime.now(), "try to buy", size_to_buy, "trx_id", order_transaction_id)
+
+        self.orders[order_transaction_id] = Order(order_transaction_id, self.assetPair, size_to_buy, float(ask) * 1.01, 'buy')
+
+    def market_sell(self, size_to_sell):
+
+        bid, ask = self.cybex.fetch_best_price(self.assetPair)
+        # put some buffer in price
+        order_transaction_id, result = self.cybex.create_order(self.assetPair, 'sell', size_to_sell, float(bid) * 0.99)
+
+        print(datetime.now(), "try to sell", size_to_sell, "trx_id", order_transaction_id)
+
+        self.orders[order_transaction_id] = Order(order_transaction_id, self.assetPair, size_to_sell, float(bid) * 0.99, 'buy')
+
     def cancel(self, trx_id):
         print(datetime.now(), 'cancelling', trx_id)
         result = self.cybex.cancel_order(trx_id)
@@ -351,12 +371,10 @@ class OrderManager:
             return True
 
         if to_trade > 0:
-            best_ask = orderbook.get_best_ask()
-            self.buy(best_ask, to_trade)
+            self.market_buy(to_trade)
             return True
         elif to_trade < 0:
-            best_bid = orderbook.get_best_bid()
-            self.sell(best_bid, -1 * to_trade)
+            self.market_sell(-1 * to_trade)
             return True
 
     # @staticmethod
@@ -401,7 +419,7 @@ class OrderManager:
     def update_orders(self):
         # noinspection PyBroadException
         try:
-            order_datas = self.cybex.fetch_orders()
+            order_datas = self.cybex.fetch_orders(self.assetPair)
 
             for order_data in order_datas:
                 order_update = OrderManager.parse_order_apiserver(order_data)
