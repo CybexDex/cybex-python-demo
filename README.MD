@@ -3,6 +3,11 @@ WELCOME To CYBEX ROME API Demo
 
 This is the python demo for [CYBEX ROME API](https://github.com/CybexDex/RomeAPI).
 
+Start with Jupyter Notebook
+-----------
+
+If you want to try out API with interactive notebook, please look at the jupiter-demo, replacing with your account credentials.
+![alt jupyter](http://cybexlingual.oss-cn-hongkong.aliyuncs.com/test.png)
 
 Quick Start
 -----------
